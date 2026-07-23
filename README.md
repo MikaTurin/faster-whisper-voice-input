@@ -51,6 +51,23 @@ sudo apt install -y xdotool
 
 ## Install
 
+Before you start, make sure:
+
+- The [Requirements](#requirements) above are installed (Python deps,
+  `notify-send`/`paplay`, and `wtype` or `xdotool` depending on your
+  display server).
+- You've picked a hotkey to bind (see [Bind it to a hotkey](#bind-it-to-a-hotkey)).
+
+**1. Set the constants in `dictate-daemon.py` for your own setup**, before
+copying it anywhere:
+
+| Constant | Default | Meaning |
+|---|---|---|
+| `MODEL_SIZE` | `"small"` | Whisper model size (`tiny`/`base`/`small`/`medium`/`large`) — bigger is more accurate but slower and heavier on RAM |
+| `LANGUAGE` | `"en"` | Fixed dictation language, passed straight to `transcribe()` |
+
+**2. Install and enable the daemon:**
+
 ```bash
 mkdir -p ~/bin/sounds
 cp dictate-daemon.py dictate.py ~/bin/
@@ -63,32 +80,27 @@ systemctl --user daemon-reload
 systemctl --user enable --now dictate.service
 ```
 
-## Configuration
+### Single language only
 
-Edit the constants near the top of `dictate-daemon.py`:
-
-| Constant | Default | Meaning |
-|---|---|---|
-| `MODEL_SIZE` | `"small"` | Whisper model size (`tiny`/`base`/`small`/`medium`/`large`) — bigger is more accurate but slower and heavier on RAM |
-| `LANGUAGE` | `"ru"` | Fixed dictation language, passed straight to `transcribe()` |
-| `SILENCE_MS` | `600` | Trailing silence (ms) that closes an utterance — raise it if pauses mid-sentence are getting split too eagerly |
-| `MIN_SPEECH_MS` | `300` | Ignore detected speech shorter than this (coughs, mic pops) |
-| `POLL_INTERVAL_S` | `0.25` | How often the segmenter re-checks the buffer |
-
-### Multiple languages
-
-By default the daemon dictates in a single fixed language — simplest and
-fastest. If you need more than one, replace `LANGUAGE` with a set of
-allowed languages and add a `model.detect_language()` pass before
-transcribing each chunk in `transcription_worker`. This roughly **doubles**
+This daemon is built for dictating in one fixed language at a time —
+set via `LANGUAGE` above. Multi-language (auto-detected) dictation isn't
+supported out of the box. Adding it would mean replacing `LANGUAGE` with a
+set of allowed languages and adding a `model.detect_language()` pass before
+transcribing each chunk in `transcription_worker`. That roughly **doubles**
 the encoder cost per chunk (detection runs the encoder once, transcription
-runs it again), so expect dictation to run **~30-50% slower**.
+runs it again), so expect dictation to run **~30-50% slower** — and
+detection is per-chunk, so it only works reliably at silence-delimited
+utterance boundaries, not mid-sentence code-switching.
 
 ### Bigger/more accurate model
 
+By default the daemon runs on CPU (`device="cpu", compute_type="int8"` in
+`WhisperModel(...)`) with `MODEL_SIZE = "small"` — no GPU or extra drivers
+needed.
+
 `MODEL_SIZE = "medium"` is noticeably more accurate, especially on
 non-English languages and background noise, but ~5-7x slower on CPU and
-uses roughly 10x the RAM of `base`. With the continuous chunked
+uses roughly 3x the RAM of `small`. With the continuous chunked
 architecture here, a model that's too slow relative to your talking pace
 can make the transcription queue fall behind. Got a decent NVIDIA GPU? Swap
 `device="cpu"` for `device="cuda", compute_type="float16"` in
@@ -109,12 +121,19 @@ systemctl --user restart dictate.service   # restart after editing the script
 journalctl --user -u dictate.service -f    # live logs
 ```
 
+## Tuning
+
+These constants in `dictate-daemon.py` only matter if you want to tweak
+segmentation behavior after trying it out:
+
+| Constant | Default | Meaning |
+|---|---|---|
+| `SILENCE_MS` | `600` | Trailing silence (ms) that closes an utterance — raise it if pauses mid-sentence are getting split too eagerly |
+| `MIN_SPEECH_MS` | `300` | Ignore detected speech shorter than this (coughs, mic pops) |
+| `POLL_INTERVAL_S` | `0.25` | How often the segmenter re-checks the buffer |
+
 ## Credits
 
 The two sound cues (`sounds/start.wav`, `sounds/stop.wav`) come from
 freesound.org: [leviclaassen/sounds/107786](https://freesound.org/people/leviclaassen/sounds/107786/)
 and [MATRIXXX_](https://freesound.org/people/MATRIXXX_/).
-
-## License
-
-MIT — see [LICENSE](LICENSE).

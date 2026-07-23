@@ -11,7 +11,7 @@ from faster_whisper.vad import VadOptions, get_speech_timestamps
 
 FIFO = "/tmp/dictate.fifo"
 MODEL_SIZE = "small"
-LANGUAGE = "ru"
+LANGUAGE = "en"
 SAMPLE_RATE = 16000
 
 SILENCE_MS = 600  # trailing silence that closes an utterance
