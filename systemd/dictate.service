@@ -1,0 +1,9 @@
+[Unit]
+Description=Dictation daemon (faster-whisper)
+
+[Service]
+ExecStart=/home/mika/bin/dictate-daemon.py
+Restart=on-failure
+
+[Install]
+WantedBy=default.target
