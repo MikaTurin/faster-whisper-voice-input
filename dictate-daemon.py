@@ -15,7 +15,7 @@ LANGUAGE = "en"
 SAMPLE_RATE = 16000
 
 SILENCE_MS = 600  # trailing silence that closes an utterance
-MIN_SPEECH_MS = 300  # ignore shorter blips
+MIN_SPEECH_MS = 500  # ignore shorter blips
 POLL_INTERVAL_S = 0.25  # how often the segmenter re-checks the buffer
 
 SOUND_START = os.path.expanduser("~/bin/sounds/start.wav")
@@ -94,7 +94,9 @@ def segmenter_loop():
 def transcription_worker(model):
     while True:
         chunk = transcribe_queue.get()
-        segments, _ = model.transcribe(chunk, language=LANGUAGE)
+        segments, _ = model.transcribe(
+            chunk, language=LANGUAGE, condition_on_previous_text=False, vad_filter=True
+        )
         text = " ".join(seg.text.strip() for seg in segments).strip()
         if text:
             subprocess.run(["xdotool", "type", "--clearmodifiers", "--", text + " "])

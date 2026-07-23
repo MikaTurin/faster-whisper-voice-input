@@ -129,7 +129,7 @@ segmentation behavior after trying it out:
 | Constant | Default | Meaning |
 |---|---|---|
 | `SILENCE_MS` | `600` | Trailing silence (ms) that closes an utterance — raise it if pauses mid-sentence are getting split too eagerly |
-| `MIN_SPEECH_MS` | `300` | Ignore detected speech shorter than this (coughs, mic pops) |
+| `MIN_SPEECH_MS` | `500` | Ignore detected speech shorter than this (coughs, mic pops) |
 | `POLL_INTERVAL_S` | `0.25` | How often the segmenter re-checks the buffer |
 
 ## Credits
