@@ -1,4 +1,4 @@
-# faster-whisper-dictation
+# faster-whisper-voice-input
 
 Local, offline, continuous voice dictation for Linux. Speak into any
 focused window — a terminal, an IDE, a chat box — and it gets typed for
