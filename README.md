@@ -64,6 +64,8 @@ copying it anywhere:
 | Constant | Default | Meaning |
 |---|---|---|
 | `MODEL_SIZE` | `"small"` | Whisper model size (`tiny`/`base`/`small`/`medium`/`large`) — bigger is more accurate but slower and heavier on RAM |
+| `MODEL_DEVICE` | `"cpu"` | Passed straight to `WhisperModel(...)` — set to `"cuda"` if you have an NVIDIA GPU (see [Bigger/more accurate model](#biggermore-accurate-model)) |
+| `MODEL_COMPUTE_TYPE` | `"int8"` | Passed straight to `WhisperModel(...)` — pair with `MODEL_DEVICE` (`"int8"` for CPU, `"float16"` for CUDA) |
 | `LANGUAGE` | `"en"` | Fixed dictation language, passed straight to `transcribe()` |
 
 **2. Install and enable the daemon:**
@@ -124,18 +126,18 @@ utterance boundaries, not mid-sentence code-switching.
 
 ### Bigger/more accurate model
 
-By default the daemon runs on CPU (`device="cpu", compute_type="int8"` in
-`WhisperModel(...)`) with `MODEL_SIZE = "small"` — no GPU or extra drivers
-needed.
+By default the daemon runs on CPU (`MODEL_DEVICE = "cpu"`,
+`MODEL_COMPUTE_TYPE = "int8"`) with `MODEL_SIZE = "small"` — no GPU or
+extra drivers needed.
 
 `MODEL_SIZE = "medium"` is noticeably more accurate, especially on
 non-English languages and background noise, but ~5-7x slower on CPU and
 uses roughly 3x the RAM of `small`. With the continuous chunked
 architecture here, a model that's too slow relative to your talking pace
-can make the transcription queue fall behind. Got a decent NVIDIA GPU? Swap
-`device="cpu"` for `device="cuda", compute_type="float16"` in
-`WhisperModel(...)` — needs the proprietary NVIDIA driver plus
-`nvidia-cublas-cu12`/`nvidia-cudnn-cu12` (no full CUDA toolkit required).
+can make the transcription queue fall behind. Got a decent NVIDIA GPU? Set
+`MODEL_DEVICE = "cuda"` and `MODEL_COMPUTE_TYPE = "float16"` — needs the
+proprietary NVIDIA driver plus `nvidia-cublas-cu12`/`nvidia-cudnn-cu12` (no
+full CUDA toolkit required).
 
 ## Bind it to a hotkey
 

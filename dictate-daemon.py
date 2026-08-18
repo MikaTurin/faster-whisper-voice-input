@@ -11,6 +11,8 @@ from faster_whisper.vad import VadOptions, get_speech_timestamps
 
 FIFO = "/tmp/dictate.fifo"
 MODEL_SIZE = "small"
+MODEL_DEVICE = "cpu"
+MODEL_COMPUTE_TYPE = "int8"
 LANGUAGE = "en"
 SAMPLE_RATE = 16000
 
@@ -141,7 +143,7 @@ def main():
     from faster_whisper import WhisperModel
 
     notify("Loading model...")
-    model = WhisperModel(MODEL_SIZE, device="cpu", compute_type="int8")
+    model = WhisperModel(MODEL_SIZE, device=MODEL_DEVICE, compute_type=MODEL_COMPUTE_TYPE)
     notify("Dictation daemon ready")
 
     threading.Thread(target=transcription_worker, args=(model,), daemon=True).start()
