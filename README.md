@@ -80,6 +80,36 @@ systemctl --user daemon-reload
 systemctl --user enable --now dictate.service
 ```
 
+`systemd/dictate.service` hardcodes two X11-specific environment variables:
+
+```
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=%h/.Xauthority
+```
+
+They only matter if `xdotool` is the one typing your text (X11 session — see
+[Requirements](#requirements)). On Wayland (`wtype`) they're unused and safe
+to ignore. The reason they're pinned at all: a systemd `--user` service
+doesn't reliably inherit `DISPLAY`/`XAUTHORITY` from your desktop session,
+especially if it starts early at login/boot — `xdotool` then fails with
+`Can't open display`.
+
+Whether you need to change them depends on your setup — check from a
+terminal *inside your desktop session* (not this systemd service):
+
+```bash
+echo $DISPLAY      # almost always :0 on a normal single-seat desktop
+echo $XAUTHORITY   # ~/.Xauthority on most setups (LightDM, startx, …) —
+                    # but GDM (stock Ubuntu/Fedora) often puts it somewhere
+                    # under /run/user/<uid>/ instead
+```
+
+- If both match the defaults above (`:0` and `~/.Xauthority`, which `%h`
+  expands to) — leave the file as-is, nothing to edit.
+- If either differs, edit the corresponding `Environment=` line in your
+  copy of `dictate.service` to match, then `systemctl --user daemon-reload
+  && systemctl --user restart dictate.service`.
+
 ### Single language only
 
 This daemon is built for dictating in one fixed language at a time —
