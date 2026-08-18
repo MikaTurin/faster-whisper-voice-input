@@ -4,7 +4,7 @@ Description=Dictation daemon (faster-whisper)
 [Service]
 Environment=DISPLAY=:0
 Environment=XAUTHORITY=%h/.Xauthority
-ExecStart=/home/mika/bin/dictate-daemon.py
+ExecStart=%h/bin/dictate-daemon.py
 Restart=on-failure
 
 [Install]
